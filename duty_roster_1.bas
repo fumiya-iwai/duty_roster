@@ -1,12 +1,15 @@
 Attribute VB_Name = "Module1"
 Sub make_table()
-  
+
+' 教室業務当番表を作る
+
 Dim days As New Collection
-Dim days_length As Integer
-Dim d As Variant
-Dim n As Integer
+Dim day As Variant
+Dim day_of_week As Integer
 Dim i As Integer
+Dim n As Integer
 Dim count As Integer
+Dim delete_from As Integer
 
 count = 0
 For i = 12 To 18
@@ -27,51 +30,50 @@ For i = 12 To Sheets("Sheet1").Cells(Rows.count, 2).End(xlUp).Row
     End If
 Next
 
-days_length = days.count
-
-count = 12
-For Each d In days
-    If IsDate(d) Then
-        If Weekday(d) = 3 Then
-            n = 4
-        ElseIf Weekday(d) = 4 Then
-            n = 6
-        ElseIf Weekday(d) = 5 Then
-            n = 8
-        ElseIf Weekday(d) = 6 Then
-            n = 10
-        ElseIf Weekday(d) = 7 Then
-            n = 12
-        ElseIf Weekday(d) = 1 Then
-            n = 14
-        ElseIf Weekday(d) = 2 Then
-            n = 16
-        End If
+n = 12
+For Each day In days
+    If IsDate(day) Then
+        Select Case Weekday(day)
+            Case 3
+                day_of_week = 4
+            Case 4
+                day_of_week = 6
+            Case 5
+                day_of_week = 8
+            Case 6
+                day_of_week = 10
+            Case 7
+                day_of_week = 12
+            Case 1
+                day_of_week = 14
+            Case 2
+                day_of_week = 16
+        End Select
         
-        Sheets("Sheet1").Cells(count, 4).Value = d
+        Sheets("Sheet1").Cells(n, 4).Value = day
         
         For i = 6 To 10
-            If Sheets("Sheet2").Cells(i, n) = "" Then
+            If Sheets("Sheet2").Cells(i, day_of_week) = "" Then
                 Err.Raise Number:=555, Description:="Sheet2で出力する曜日の当番を埋めてください"
             Else
-                Sheets("Sheet1").Cells(count, i - 1).Value = Sheets("Sheet2").Cells(i, n).Value
-                If Sheets("Sheet2").Cells(i, n + 1) = "x" Then
-                    Sheets("Sheet1").Cells(count, i - 1).Value = Sheets("Sheet1").Cells(count, i - 1).Value + "  (リトライ)"
-                    Sheets("Sheet2").Cells(i, n + 1) = ""
-                    Sheets("Sheet2").Cells(i, n).Font.Color = RGB(0, 0, 0)
+                Sheets("Sheet1").Cells(n, i - 1).Value = Sheets("Sheet2").Cells(i, day_of_week).Value
+                If Sheets("Sheet2").Cells(i, day_of_week + 1) = "x" Then
+                    Sheets("Sheet1").Cells(n, i - 1).Value = Sheets("Sheet1").Cells(n, i - 1).Value + "  (リトライ)"
+                    Sheets("Sheet2").Cells(i, day_of_week + 1) = ""
+                    Sheets("Sheet2").Cells(i, day_of_week).Font.Color = RGB(0, 0, 0)
                 End If
             End If
         Next
     Else
         Err.Raise Number:=666, Description:="oooo/oo/ooの形で日付を入力してください"
     End If
-count = count + 1
-Next d
+n = n + 1
+Next day
 
 Sheets("Sheet1").Cells(9, 7).Value = days(1)
-Sheets("Sheet1").Cells(9, 9).Value = days(days_length)
+Sheets("Sheet1").Cells(9, 9).Value = days(days.count)
 
-delete_from = days_length + 12
+delete_from = days.count + 12
 If delete_from < 19 Then
     Sheets("Sheet1").Range(Cells(delete_from, 4), Cells(18, 9)).ClearContents
 End If
@@ -81,6 +83,8 @@ End Sub
  
  
 Sub print_table()
+ 
+' 教室業務当番表を印刷する
  
 Dim last_row As Integer
  
